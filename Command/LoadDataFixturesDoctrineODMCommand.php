@@ -55,7 +55,7 @@ EOT
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $dm = $this->getContainer()->get('doctrine_mongodb')->getManager($input->getOption('dm'));
+        $dm = $this->container->get('doctrine_mongodb')->getManager($input->getOption('dm'));
 
         $dirOrFile = $input->getOption('fixtures');
         $bundles = $input->getOption('bundles');
@@ -75,14 +75,14 @@ EOT
         if ($dirOrFile) {
             $paths = is_array($dirOrFile) ? $dirOrFile : [$dirOrFile];
         } elseif ($bundles) {
-            $kernel = $this->getContainer()->get('kernel');
+            $kernel = $this->container->get('kernel');
             $paths = [$kernel->getRootDir().'/DataFixtures/MongoDB'];
             foreach ($bundles as $bundle) {
                 $paths[] = $kernel->getBundle($bundle)->getPath();
             }
         } else {
-            $kernel = $this->getContainer()->get('kernel');
-            $paths = $this->getContainer()->getParameter('doctrine_mongodb.odm.fixtures_dirs');
+            $kernel = $this->container->get('kernel');
+            $paths = $this->container->getParameter('doctrine_mongodb.odm.fixtures_dirs');
             $paths = is_array($paths) ? $paths : [$paths];
             $paths[] = $kernel->getRootDir().'/DataFixtures/MongoDB';
             foreach ($kernel->getBundles() as $bundle) {
@@ -90,8 +90,8 @@ EOT
             }
         }
 
-        $loaderClass = $this->getContainer()->getParameter('doctrine_mongodb.odm.fixture_loader');
-        $loader = new $loaderClass($this->getContainer());
+        $loaderClass = $this->container->getParameter('doctrine_mongodb.odm.fixture_loader');
+        $loader = new $loaderClass($this->container);
         foreach ($paths as $path) {
             if (is_dir($path)) {
                 $loader->loadFromDirectory($path);

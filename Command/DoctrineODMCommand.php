@@ -6,17 +6,38 @@ namespace Doctrine\Bundle\MongoDBBundle\Command;
 use Doctrine\ODM\MongoDB\Tools\DisconnectedClassMetadataFactory;
 use Doctrine\ODM\MongoDB\Tools\DocumentGenerator;
 use Doctrine\ODM\MongoDB\Tools\Console\Helper\DocumentManagerHelper;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
+use const E_USER_DEPRECATED;
+use function sprintf;
+use function trigger_error;
 
 /**
  * Base class for Doctrine ODM console commands to extend.
  *
  * @author Justin Hileman <justin@justinhileman.info>
  */
-abstract class DoctrineODMCommand extends ContainerAwareCommand
+abstract class DoctrineODMCommand extends Command implements ContainerAwareInterface
 {
+    use ContainerAwareTrait;
+
+    /**
+     * @return ContainerInterface
+     */
+    protected function getContainer()
+    {
+        @trigger_error(
+            sprintf('The %s method is deprecated and should not be used. Please wire your dependencies explicitly.', __METHOD__),
+            E_USER_DEPRECATED
+        );
+
+        return $this->container;
+    }
+
     public static function setApplicationDocumentManager(Application $application, $dmName)
     {
         $dm = $application->getKernel()->getContainer()->get('doctrine_mongodb')->getManager($dmName);
@@ -38,7 +59,7 @@ abstract class DoctrineODMCommand extends ContainerAwareCommand
 
     protected function getDoctrineDocumentManagers()
     {
-        return $this->getContainer()->get('doctrine_mongodb')->getManagers();
+        return $this->container->get('doctrine_mongodb')->getManagers();
     }
 
     protected function getBundleMetadatas(Bundle $bundle)
