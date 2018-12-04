@@ -3,10 +3,10 @@
 
 namespace Doctrine\Bundle\MongoDBBundle\Command;
 
+use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\Common\DataFixtures\Executor\MongoDBExecutor;
 use Doctrine\Common\DataFixtures\Loader;
 use Doctrine\Common\DataFixtures\Purger\MongoDBPurger;
-use Symfony\Bridge\Doctrine\DataFixtures\ContainerAwareLoader;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -20,6 +20,13 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
  */
 class LoadDataFixturesDoctrineODMCommand extends DoctrineODMCommand
 {
+    private $kernel;
+
+    public function __construct(ManagerRegistry $registry = null)
+    {
+        parent::__construct($registry);
+    }
+
     /**
      * @return boolean
      */
@@ -55,7 +62,7 @@ EOT
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $dm = $this->container->get('doctrine_mongodb')->getManager($input->getOption('dm'));
+        $dm = $this->getManagerRegistry()->getManager($input->getOption('dm'));
 
         $dirOrFile = $input->getOption('fixtures');
         $bundles = $input->getOption('bundles');

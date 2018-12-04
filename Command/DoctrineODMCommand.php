@@ -3,6 +3,7 @@
 
 namespace Doctrine\Bundle\MongoDBBundle\Command;
 
+use Doctrine\Bundle\MongoDBBundle\ManagerRegistry;
 use Doctrine\ODM\MongoDB\Tools\DisconnectedClassMetadataFactory;
 use Doctrine\ODM\MongoDB\Tools\DocumentGenerator;
 use Doctrine\ODM\MongoDB\Tools\Console\Helper\DocumentManagerHelper;
@@ -24,6 +25,25 @@ use function trigger_error;
 abstract class DoctrineODMCommand extends Command implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
+
+    /**
+     * @var ManagerRegistry|null
+     */
+    private $managerRegistry;
+
+    public function __construct(ManagerRegistry $registry = null)
+    {
+        parent::__construct(null);
+
+        if ($registry === null) {
+            @trigger_error(
+                sprintf('Instantiating the %s class without a manager registry is deprecated and will be removed in 4.0.', static::class),
+                E_USER_DEPRECATED
+            );
+        }
+
+        $this->managerRegistry = $registry;
+    }
 
     /**
      * @return ContainerInterface
@@ -59,7 +79,19 @@ abstract class DoctrineODMCommand extends Command implements ContainerAwareInter
 
     protected function getDoctrineDocumentManagers()
     {
-        return $this->container->get('doctrine_mongodb')->getManagers();
+        return $this->getManagerRegistry()->getManagers();
+    }
+
+    /**
+     * @deprecated Will be removed in 4.0
+     */
+    protected function getManagerRegistry()
+    {
+        if ($this->managerRegistry === null) {
+            $this->managerRegistry = $this->container->get('doctrine_mongodb');
+        }
+
+        return $this->managerRegistry;
     }
 
     protected function getBundleMetadatas(Bundle $bundle)
