@@ -7,6 +7,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use const E_USER_DEPRECATED;
+use function sprintf;
+use function trigger_error;
 
 /**
  * Generate document classes from mapping information
@@ -16,6 +19,15 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class GenerateDocumentsDoctrineODMCommand extends DoctrineODMCommand
 {
+    public function __construct($name = null)
+    {
+        parent::__construct($name);
+
+        if (self::class !== static::class) {
+            @trigger_error(sprintf('The %s class is deprecated and will be dropped in 4.0.', self::class), E_USER_DEPRECATED);
+        }
+    }
+
     protected function configure()
     {
         $this
@@ -48,6 +60,8 @@ EOT
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        @trigger_error(sprintf('The %s command is deprecated and will be dropped in 4.0.', $this->getName()), E_USER_DEPRECATED);
+
         $bundleName = $input->getArgument('bundle');
         $filterDocument = $input->getOption('document');
 
