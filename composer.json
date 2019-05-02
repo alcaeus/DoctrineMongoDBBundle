@@ -25,6 +25,7 @@
     },
     "require-dev": {
         "doctrine/data-fixtures": "@dev",
+        "symfony/cache": "^3.4 || ^4.0",
         "symfony/form": "^3.4 || ^4.0",
         "symfony/yaml": "^3.4 || ^4.0",
         "symfony/phpunit-bridge": "^3.4 || ^4.0",

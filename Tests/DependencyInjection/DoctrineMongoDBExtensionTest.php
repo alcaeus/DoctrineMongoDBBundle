@@ -59,6 +59,83 @@ class DoctrineMongoDBExtensionTest extends TestCase
         $this->assertEquals($value, $container->getParameter('doctrine_mongodb.odm.'.$parameter));
     }
 
+    /**
+     * @param array|string $cacheConfig
+     *
+     * @dataProvider cacheConfigurationProvider
+     */
+    public function testCacheConfiguration($expectedAliasName, $expectedAliasTarget, $cacheName, $cacheConfig)
+    {
+        $loader = new DoctrineMongoDBExtension();
+        $loader->load(self::buildConfiguration(['document_managers' => ['default' => []]]), $container = $this->buildMinimalContainer());
+
+        $this->assertTrue($container->hasAlias($expectedAliasName));
+        $alias = $container->getAlias($expectedAliasName);
+        $this->assertEquals($expectedAliasTarget, (string) $alias);
+    }
+
+    public static function cacheConfigurationProvider()
+    {
+        return [
+            'metadata_cache_provider' => [
+                'expectedAliasName' => 'doctrine.orm.default_metadata_cache',
+                'expectedAliasTarget' => 'doctrine_cache.providers.metadata_cache',
+                'cacheName' => 'metadata_cache_driver',
+                'cacheConfig' => ['cache_provider' => 'metadata_cache'],
+            ],
+            'query_cache_provider' => [
+                'expectedAliasName' => 'doctrine.orm.default_query_cache',
+                'expectedAliasTarget' => 'doctrine_cache.providers.query_cache',
+                'cacheName' => 'query_cache_driver',
+                'cacheConfig' => ['cache_provider' => 'query_cache'],
+            ],
+            'result_cache_provider' => [
+                'expectedAliasName' => 'doctrine.orm.default_result_cache',
+                'expectedAliasTarget' => 'doctrine_cache.providers.result_cache',
+                'cacheName' => 'result_cache_driver',
+                'cacheConfig' => ['cache_provider' => 'result_cache'],
+            ],
+
+            'metadata_cache_service' => [
+                'expectedAliasName' => 'doctrine.orm.default_metadata_cache',
+                'expectedAliasTarget' => 'service_target_metadata',
+                'cacheName' => 'metadata_cache_driver',
+                'cacheConfig' => ['type' => 'service', 'id' => 'service_target_metadata'],
+            ],
+            'query_cache_service' => [
+                'expectedAliasName' => 'doctrine.orm.default_query_cache',
+                'expectedAliasTarget' => 'service_target_query',
+                'cacheName' => 'query_cache_driver',
+                'cacheConfig' => ['type' => 'service', 'id' => 'service_target_query'],
+            ],
+            'result_cache_service' => [
+                'expectedAliasName' => 'doctrine.orm.default_result_cache',
+                'expectedAliasTarget' => 'service_target_result',
+                'cacheName' => 'result_cache_driver',
+                'cacheConfig' => ['type' => 'service', 'id' => 'service_target_result'],
+            ],
+
+            'metadata_cache_array' => [
+                'expectedAliasName' => 'doctrine.orm.default_metadata_cache',
+                'expectedAliasTarget' => 'doctrine_cache.providers.doctrine.orm.default_metadata_cache',
+                'cacheName' => 'metadata_cache_driver',
+                'cacheConfig' => 'array',
+            ],
+            'query_cache_array' => [
+                'expectedAliasName' => 'doctrine.orm.default_query_cache',
+                'expectedAliasTarget' => 'doctrine_cache.providers.doctrine.orm.default_query_cache',
+                'cacheName' => 'query_cache_driver',
+                'cacheConfig' => 'array',
+            ],
+            'result_cache_array' => [
+                'expectedAliasName' => 'doctrine.orm.default_result_cache',
+                'expectedAliasTarget' => 'doctrine_cache.providers.doctrine.orm.default_result_cache',
+                'cacheName' => 'result_cache_driver',
+                'cacheConfig' => 'array',
+            ],
+        ];
+    }
+
     private function getContainer($bundles = 'YamlBundle')
     {
         $bundles = (array) $bundles;

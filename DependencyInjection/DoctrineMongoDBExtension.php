@@ -5,8 +5,10 @@ namespace Doctrine\Bundle\MongoDBBundle\DependencyInjection;
 
 use Doctrine\Bundle\MongoDBBundle\DependencyInjection\Compiler\ServiceRepositoryCompilerPass;
 use Doctrine\Bundle\MongoDBBundle\Repository\ServiceDocumentRepositoryInterface;
+use LogicException;
 use Symfony\Bridge\Doctrine\DependencyInjection\AbstractDoctrineExtension;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Cache\DoctrineProvider;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -427,6 +429,48 @@ class DoctrineMongoDBExtension extends AbstractDoctrineExtension
     public function getXsdValidationBasePath()
     {
         return __DIR__.'/../Resources/config/schema';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function loadCacheDriver($driverName, $entityManagerName, array $driverMap, ContainerBuilder $container)
+    {
+        $serviceId = null;
+        $aliasId   = $this->getObjectManagerElementName(sprintf('%s_%s', $entityManagerName, $driverName));
+
+        switch ($driverMap['type']) {
+            case 'service':
+                $serviceId = $driverMap['id'];
+                break;
+
+            case 'pool':
+                $serviceId = $this->createPoolCacheDefinition($container, $aliasId, $driverMap['pool']);
+                break;
+        }
+
+        if ($serviceId !== null) {
+            $container->setAlias($aliasId, new Alias($serviceId, false));
+
+            return $aliasId;
+        }
+
+        return parent::loadCacheDriver($driverName, $entityManagerName, $driverMap, $container);
+    }
+
+    private function createPoolCacheDefinition(ContainerBuilder $container, string $aliasId, string $poolName) : string
+    {
+        if (! class_exists(DoctrineProvider::class)) {
+            throw new LogicException('Using the "pool" cache type is only supported when symfony/cache is installed.');
+        }
+
+        $serviceId = sprintf('doctrine.orm.cache.pool.%s', $poolName);
+
+        $definition = $container->register($aliasId, DoctrineProvider::class);
+        $definition->addArgument(new Reference($poolName));
+        $definition->setPrivate(true);
+
+        return $serviceId;
     }
 
     /**
