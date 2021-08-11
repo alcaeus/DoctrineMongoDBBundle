@@ -489,9 +489,7 @@ class DoctrineMongoDBExtension extends AbstractDoctrineExtension
         return 'http://symfony.com/schema/dic/doctrine/odm/mongodb';
     }
 
-    /**
-     * @return string
-     */
+    /** @return string */
     public function getXsdValidationBasePath()
     {
         return __DIR__ . '/../Resources/config/schema';

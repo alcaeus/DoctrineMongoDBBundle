@@ -40,17 +40,13 @@ abstract class DoctrineODMCommand extends Command implements ContainerAwareInter
         $this->managerRegistry = $registry;
     }
 
-    /**
-     * @return ContainerInterface
-     */
+    /** @return ContainerInterface */
     protected function getContainer()
     {
         return $this->container;
     }
 
-    /**
-     * @param string $dmName
-     */
+    /** @param string $dmName */
     public static function setApplicationDocumentManager(Application $application, $dmName)
     {
         $dm        = $application->getKernel()->getContainer()->get('doctrine_mongodb')->getManager($dmName);
@@ -58,9 +54,7 @@ abstract class DoctrineODMCommand extends Command implements ContainerAwareInter
         $helperSet->set(new DocumentManagerHelper($dm), 'dm');
     }
 
-    /**
-     * @return ObjectManager[]
-     */
+    /** @return ObjectManager[] */
     protected function getDoctrineDocumentManagers()
     {
         return $this->getManagerRegistry()->getManagers();

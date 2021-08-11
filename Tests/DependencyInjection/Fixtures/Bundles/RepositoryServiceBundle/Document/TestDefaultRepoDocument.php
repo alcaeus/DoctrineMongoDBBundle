@@ -6,9 +6,7 @@ namespace Fixtures\Bundles\RepositoryServiceBundle\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
-/**
- * @ODM\Document
- */
+/** @ODM\Document */
 class TestDefaultRepoDocument
 {
     /**

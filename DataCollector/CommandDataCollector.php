@@ -52,9 +52,7 @@ class CommandDataCollector extends DataCollector
         return $this->data['num_commands'];
     }
 
-    /**
-     * @return string[]
-     */
+    /** @return string[] */
     public function getCommands(): array
     {
         return $this->data['commands'];

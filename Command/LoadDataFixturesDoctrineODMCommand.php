@@ -40,9 +40,7 @@ class LoadDataFixturesDoctrineODMCommand extends DoctrineODMCommand
         $this->fixturesLoader = $fixturesLoader;
     }
 
-    /**
-     * @return bool
-     */
+    /** @return bool */
     public function isEnabled()
     {
         return parent::isEnabled() && class_exists(Loader::class);
@@ -77,9 +75,7 @@ EOT
         );
     }
 
-    /**
-     * @return int
-     */
+    /** @return int */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $dm = $this->getManagerRegistry()->getManager($input->getOption('dm'));

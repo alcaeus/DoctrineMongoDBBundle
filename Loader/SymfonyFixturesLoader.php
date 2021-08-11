@@ -134,9 +134,7 @@ final class SymfonyFixturesLoader extends ContainerAwareLoader implements Symfon
         }
     }
 
-    /**
-     * @param string[] $fixtures An array of fixtures with class names as keys
-     */
+    /** @param string[] $fixtures An array of fixtures with class names as keys */
     private function validateDependencies(array $fixtures, FixtureInterface $fixture)
     {
         if (! $fixture instanceof DependentFixtureInterface) {

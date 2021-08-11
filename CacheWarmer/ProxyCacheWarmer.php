@@ -80,9 +80,7 @@ class ProxyCacheWarmer implements CacheWarmerInterface
         return [];
     }
 
-    /**
-     * @return ClassMetadata[]
-     */
+    /** @return ClassMetadata[] */
     private function getClassesForProxyGeneration(DocumentManager $dm)
     {
         return array_filter($dm->getMetadataFactory()->getAllMetadata(), static function (ClassMetadata $metadata) {

@@ -13,9 +13,7 @@ use function sprintf;
 
 trait ServiceRepositoryTrait
 {
-    /**
-     * @param string $documentClass The class name of the entity this repository manages
-     */
+    /** @param string $documentClass The class name of the entity this repository manages */
     public function __construct(ManagerRegistry $registry, $documentClass)
     {
         $manager = $registry->getManagerForClass($documentClass);

@@ -47,9 +47,7 @@ class DoctrineMongoDBExtensionTest extends TestCase
         ]));
     }
 
-    /**
-     * @dataProvider parameterProvider
-     */
+    /** @dataProvider parameterProvider */
     public function testParameterOverride(string $option, string $parameter, string $value): void
     {
         $container = $this->buildMinimalContainer();
@@ -61,9 +59,7 @@ class DoctrineMongoDBExtensionTest extends TestCase
         $this->assertEquals($value, $container->getParameter('doctrine_mongodb.odm.' . $parameter));
     }
 
-    /**
-     * @param string|string[] $bundles
-     */
+    /** @param string|string[] $bundles */
     private function getContainer($bundles = 'OtherXmlBundle'): ContainerBuilder
     {
         $bundles = (array) $bundles;
@@ -138,9 +134,7 @@ class DoctrineMongoDBExtensionTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider getAutomappingConfigurations
-     */
+    /** @dataProvider getAutomappingConfigurations */
     public function testAutomapping(array $documentManagers): void
     {
         $container = $this->getContainer([

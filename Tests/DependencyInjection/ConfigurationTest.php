@@ -54,9 +54,7 @@ class ConfigurationTest extends TestCase
         $this->assertEquals($defaults, $options);
     }
 
-    /**
-     * @dataProvider provideFullConfiguration
-     */
+    /** @dataProvider provideFullConfiguration */
     public function testFullConfiguration(array $config): void
     {
         $processor     = new Processor();
@@ -195,9 +193,7 @@ class ConfigurationTest extends TestCase
         $this->assertEquals($expected, $options);
     }
 
-    /**
-     * @return array<mixed[]>
-     */
+    /** @return array<mixed[]> */
     public function provideFullConfiguration(): array
     {
         $yaml = Yaml::parse(file_get_contents(__DIR__ . '/Fixtures/config/yml/full.yml'));
@@ -229,9 +225,7 @@ class ConfigurationTest extends TestCase
         }
     }
 
-    /**
-     * @return array<mixed[]>
-     */
+    /** @return array<mixed[]> */
     public function provideMergeOptions(): array
     {
         $cases = [];
@@ -353,9 +347,7 @@ class ConfigurationTest extends TestCase
         }
     }
 
-    /**
-     * @return array<mixed[]>
-     */
+    /** @return array<mixed[]> */
     public function provideNormalizeOptions(): array
     {
         $cases = [];
@@ -502,9 +494,7 @@ class ConfigurationTest extends TestCase
         $this->assertFalse(array_key_exists('replicaSet', $processedConfig['connections']['conn1']['options']));
     }
 
-    /**
-     * @dataProvider provideExceptionConfiguration
-     */
+    /** @dataProvider provideExceptionConfiguration */
     public function testFixtureLoaderValidation(array $config): void
     {
         $processor     = new Processor();
@@ -513,9 +503,7 @@ class ConfigurationTest extends TestCase
         $processor->processConfiguration($configuration, [$config]);
     }
 
-    /**
-     * @return array<mixed[]>
-     */
+    /** @return array<mixed[]> */
     public function provideExceptionConfiguration(): array
     {
         $yaml = Yaml::parse(file_get_contents(__DIR__ . '/Fixtures/config/yml/exception.yml'));

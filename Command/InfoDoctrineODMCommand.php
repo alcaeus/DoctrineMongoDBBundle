@@ -41,9 +41,7 @@ EOT
         );
     }
 
-    /**
-     * @return int
-     */
+    /** @return int */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $documentManagerName = $input->getOption('dm') ?

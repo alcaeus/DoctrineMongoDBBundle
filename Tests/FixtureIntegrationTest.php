@@ -307,9 +307,7 @@ class IntegrationTestKernel extends Kernel
         ];
     }
 
-    /**
-     * @return void
-     */
+    /** @return void */
     protected function build(ContainerBuilder $container)
     {
         $container->prependExtensionConfig('doctrine_mongodb', [

@@ -7,9 +7,7 @@ namespace Fixtures\Bundles\RepositoryServiceBundle\Document;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 use Fixtures\Bundles\RepositoryServiceBundle\Repository\TestCustomServiceRepoDocumentRepository;
 
-/**
- * @ODM\Document(repositoryClass=TestCustomServiceRepoDocumentRepository::class)
- */
+/** @ODM\Document(repositoryClass=TestCustomServiceRepoDocumentRepository::class) */
 class TestCustomServiceRepoDocument
 {
     /**

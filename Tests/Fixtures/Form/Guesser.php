@@ -6,9 +6,7 @@ namespace Doctrine\Bundle\MongoDBBundle\Tests\Fixtures\Form;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
 
-/**
- * @ODM\Document
- */
+/** @ODM\Document */
 class Guesser
 {
     /** @ODM\Id(strategy="none") */
