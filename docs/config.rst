@@ -627,85 +627,11 @@ Otherwise you will get a *auth failed* exception.
 Specifying a context service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The MongoDB driver supports receiving a stream context to set SSL and logging
-options. This can be used to authenticate using SSL certificates. To do so,
-create a service that creates your logging context:
+The MongoDB driver supports receiving a stream context to set SSL and logging options. This can be used to authenticate using SSL certificates.
 
-.. configuration-block::
+.. seealso::
 
-    .. code-block:: yaml
-
-        services:
-            # ...
-
-            app.mongodb.context_service:
-                class: 'resource'
-                factory: 'stream_context_create'
-                arguments:
-                    - { ssl: { verify_expiry: true } }
-
-    .. code-block:: php
-
-        use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-
-        return static function (ContainerConfigurator $container): void {
-            $container->services()
-                ->set('app.mongodb.context_service', 'resource')
-                ->factory('stream_context_create')
-                ->args([
-                    ['ssl' => ['verify_expiry' => true]],
-                ])
-            ;
-        };
-
-Note: the ``class`` option is not used when creating the service, but has to be
-provided for the service definition to be valid.
-
-You can then use this service in your configuration:
-
-.. configuration-block::
-
-    .. code-block:: yaml
-
-        doctrine_mongodb:
-            # ...
-            connections:
-                default:
-                    server: "mongodb://localhost:27017"
-                    driver_options:
-                        context: "app.mongodb.context_service"
-
-    .. code-block:: xml
-
-        <?xml version="1.0" ?>
-
-        <container xmlns="http://symfony.com/schema/dic/services"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xmlns:doctrine="http://symfony.com/schema/dic/doctrine/odm/mongodb"
-                   xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd
-                                http://symfony.com/schema/dic/doctrine/odm/mongodb https://symfony.com/schema/dic/doctrine/odm/mongodb/mongodb-1.0.xsd">
-
-            <doctrine:mongodb>
-                <doctrine:connection id="default" server="mongodb://localhost:27017" />
-                    <doctrine:driver-options
-                        context="app.mongodb.context_service"
-                    >
-                    </doctrine:options>
-                </doctrine:connection>
-            </doctrine:mongodb>
-        </container>
-
-    .. code-block:: php
-
-        use Symfony\Config\DoctrineMongodbConfig;
-
-        return static function (DoctrineMongodbConfig $config): void {
-            $config->connection('default')
-                ->server('mongodb://localhost:27017')
-                ->driverOptions([
-                    'context' => 'app.mongodb.context_service',
-                ]);
-        };
+    For full documentation and configuration examples for Client-Side Field-Level Encryption (CSFLE) and Queryable Encryption (QE), see :doc:`csfle_qe`
 
 Full Default Configuration
 --------------------------
@@ -781,6 +707,32 @@ Full Default Configuration
                         wTimeoutMS:                             ~
                     driver_options:
                         context:              ~ # stream context to use for connection
+                        autoEncryption:       # Options for client-side field-level encryption
+                            bypassAutoEncryption:         false # Disables auto-encryption
+                            keyVaultClient:               null  # Service ID of a MongoDB\Driver\Manager for the key vault
+                            keyVaultNamespace:            null  # The namespace for the key vault collection (e.g., "encryption.__keyVault")
+                            kmsProviders:                 []    # Configuration for Key Management System providers (see specific examples above)
+                                # e.g., local: { key: "YOUR_BASE64_KEY" }
+                                # e.g., aws: { accessKeyId: "...", secretAccessKey: "..." }
+                            schemaMap:                    []    # Document schemas for explicit encryption
+                            encryptedFieldsMap:           []    # Map of collections to their encrypted fields configuration
+                            extraOptions:                 []    # Extra options for mongocryptd
+                                # mongocryptdURI: "mongodb://localhost:27020"
+                                # mongocryptdBypassSpawn: false
+                                # mongocryptdSpawnPath: "/usr/local/bin/mongocryptd"
+                                # mongocryptdSpawnArgs: ["--idleShutdownTimeoutSecs=60"]
+                                # cryptSharedLibPath: null  # Path to the crypt_shared library
+                                # cryptSharedLibRequired: false # If true, fails if the crypt_shared library cannot be loaded
+                            bypassQueryAnalysis:          false # Disables automatic analysis of read and write operations for encryption
+                            tlsOptions:                   # TLS options for the Key Vault client (if keyVaultClient is not specified)
+                                tlsCAFile:                              null  # Path to CA file, e.g., /path/to/key-vault-ca.pem
+                                tlsCertificateKeyFile:                  null  # Path to client cert/key file, e.g., /path/to/key-vault-client.pem
+                                tlsCertificateKeyFilePassword:          null  # Password for client cert/key file
+                                tlsAllowInvalidCertificates:            false # Bypass server certificate validation (use with caution)
+                                tlsAllowInvalidHostnames:               false # Bypass server hostname validation (use with caution)
+                                tlsDisableCertificateRevocationCheck:   false # Disable CRL checks
+                                tlsDisableOCSPEndpointCheck:            false # Disable OCSP checks
+                                tlsInsecure:                            false # Allow invalid/no server cert (use with extreme caution)
 
             proxy_namespace:      MongoDBODMProxies
             proxy_dir:            "%kernel.cache_dir%/doctrine/odm/mongodb/Proxies"
@@ -909,6 +861,32 @@ Full Default Configuration
                 ->server('mongodb://localhost')
                 ->driverOptions([
                     'context' => null, // stream context to use for connection
+                    'autoEncryption' => [ // Options for client-side field-level encryption
+                        'bypassAutoEncryption' => false, // Disables auto-encryption
+                        'keyVaultClient' => null,  // Service ID of a MongoDB\Driver\Manager for the key vault
+                        'keyVaultNamespace' => null,  // The namespace for the key vault collection (e.g., "encryption.__keyVault")
+                        'kmsProviders' => [    // Configuration for Key Management System providers
+                                                 // e.g., 'local' => ['key' => 'YOUR_BASE64_KEY'],
+                                                 // e.g., 'aws' => ['accessKeyId' => '...', 'secretAccessKey' => '...'],
+                        ],
+                        'schemaMap' => [],    // Document schemas for explicit encryption
+                        'encryptedFieldsMap' => [], // Map of collections to their encrypted fields configuration
+                        'extraOptions' => [    // Extra options for mongocryptd
+                            // 'cryptSharedLibPath' => null,  // Path to the crypt_shared library
+                            // 'cryptSharedLibRequired' => false, // If true, fails if the crypt_shared library cannot be loaded
+                        ],
+                        'bypassQueryAnalysis' => false, // Disables automatic analysis of read and write operations for encryption
+                        'tlsOptions' => [        // TLS options for the Key Vault client (if keyVaultClient is not specified)
+                            // 'tlsCAFile' => null,  // Path to CA file, e.g., /path/to/key-vault-ca.pem
+                            // 'tlsCertificateKeyFile' => null,  // Path to client cert/key file, e.g., /path/to/key-vault-client.pem
+                            // 'tlsCertificateKeyFilePassword' => null,  // Password for client cert/key file
+                            // 'tlsAllowInvalidCertificates' => false, // Bypass server certificate validation (use with caution)
+                            // 'tlsAllowInvalidHostnames' => false, // Bypass server hostname validation (use with caution)
+                            // 'tlsDisableCertificateRevocation' => false, // Disable CRL checks
+                            // 'tlsDisableOCSPEndpointCheck' => false, // Disable OCSP checks
+                            // 'tlsInsecure' => false, // Allow invalid/no server cert (use with extreme caution)
+                        ],
+                    ],
                 ])
                 ->options([
                     'authMechanism' => null,
