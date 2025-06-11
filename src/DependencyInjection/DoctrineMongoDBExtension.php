@@ -44,6 +44,7 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Throwable;
 
@@ -56,6 +57,7 @@ use function interface_exists;
 use function is_dir;
 use function is_string;
 use function method_exists;
+use function realpath;
 use function sprintf;
 
 /**
@@ -508,6 +510,16 @@ class DoctrineMongoDBExtension extends AbstractDoctrineExtension
 
             if (! isset($driverOptions['autoEncryption']['keyVaultNamespace'])) {
                 $driverOptions['autoEncryption']['keyVaultNamespace'] = $config['default_database'] . '.datakeys';
+            }
+
+            if (isset($driverOptions['autoEncryption']['extraOptions']['cryptSharedLibPath'])) {
+                $fs                 = new Filesystem();
+                $cryptSharedLibPath = $driverOptions['autoEncryption']['extraOptions']['cryptSharedLibPath'];
+
+                // If it's not an absolute path, resolve it relative to the project root
+                if (! $fs->isAbsolutePath($cryptSharedLibPath)) {
+                    $driverOptions['autoEncryption']['extraOptions']['cryptSharedLibPath'] = realpath($cryptSharedLibPath);
+                }
             }
         }
 
