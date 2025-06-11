@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Doctrine\Bundle\MongoDBBundle\Command;
 
-use Composer\InstalledVersions;
 use Doctrine\Bundle\MongoDBBundle\DataCollector\ConnectionDiagnostic;
-use ReflectionExtension;
+use Doctrine\Bundle\MongoDBBundle\DataCollector\EncryptionDiagnostic;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,20 +16,8 @@ use Symfony\Contracts\Service\ServiceProviderInterface;
 
 use function array_diff;
 use function array_keys;
-use function exec;
-use function explode;
-use function extension_loaded;
-use function file_exists;
-use function getenv;
 use function implode;
-use function ob_end_clean;
-use function ob_get_contents;
-use function ob_start;
-use function phpversion;
-use function preg_match;
-use function preg_quote;
 use function sprintf;
-use function trim;
 
 /** @internal */
 #[AsCommand(
@@ -39,10 +26,15 @@ use function trim;
 )]
 final class ConnectionDiagnosticCommand extends Command
 {
+    // TODO: Inject as service?
+    private readonly EncryptionDiagnostic $encryptionDiagnostic;
+
     /** @param ServiceProviderInterface<ConnectionDiagnostic> $diagnostics */
     public function __construct(private readonly ServiceProviderInterface $diagnostics)
     {
         parent::__construct();
+
+        $this->encryptionDiagnostic = new EncryptionDiagnostic();
     }
 
     protected function configure(): void
@@ -101,66 +93,10 @@ final class ConnectionDiagnosticCommand extends Command
         return array_keys($this->diagnostics->getProvidedServices());
     }
 
-    /** @return array{extensionLoaded: bool, extensionVersion: ?string, extensionSupportsLibmongocrypt: bool, libraryVersion: ?string} */
-    private function getPhpExtensionInfo(): array
-    {
-        // There will be no "libmongocrypt" entry unless libmongocrypt is not available.
-        // When ext-mongodb was compiled with libmongocrypt support, either "libmongocrypt bundled version"
-        // or "libmongocrypt library version" will be available instead
-        $libmongocryptAvailable = $this->getExtensionInfoRow('libmongocrypt') !== 'disabled';
-
-        return [
-            'extensionLoaded' => extension_loaded('mongodb'),
-            'extensionVersion' => phpversion('mongodb') ?: null,
-            'extensionSupportsLibmongocrypt' => $libmongocryptAvailable,
-            'libraryVersion' => InstalledVersions::getPrettyVersion('mongodb/mongodb'),
-        ];
-    }
-
-    /** @return array{mongocryptdPath: ?string, mongocryptdVersion: ?string} */
-    private function getMongocryptdInfo(): array
-    {
-        $mongocryptdPath = $this->findMongocryptdPath();
-
-        return [
-            'mongocryptdPath' => $mongocryptdPath,
-            'mongocryptdVersion' => $this->getMongocryptdVersion($mongocryptdPath),
-        ];
-    }
-
-    public function getMongocryptdVersion(?string $mongocryptdPath): ?string
-    {
-        if ($mongocryptdPath === null) {
-            return null;
-        }
-
-        $output = [];
-        exec($mongocryptdPath . ' --version', $output);
-
-        if (isset($output[0])) {
-            return trim($output[0]);
-        }
-
-        return null;
-    }
-
-    private function findMongocryptdPath(): ?string
-    {
-        $paths = explode(':', getenv('PATH') ?: '');
-
-        foreach ($paths as $path) {
-            if (file_exists($path . '/mongocryptd')) {
-                return $path . '/mongocryptd';
-            }
-        }
-
-        return null;
-    }
-
     private function printAndCheckExtensionInfo(SymfonyStyle $io): bool
     {
         $io->text('<info>PHP Environment</info>');
-        $phpInfo = $this->getPhpExtensionInfo();
+        $phpInfo = $this->encryptionDiagnostic->getPhpExtensionInfo();
         $io->listing([
             'MongoDB extension loaded: ' . ($phpInfo['extensionLoaded'] ? 'Yes' : 'No'),
             'MongoDB extension version: ' . ($phpInfo['extensionVersion'] ?: '[unknown]'),
@@ -180,7 +116,7 @@ final class ConnectionDiagnosticCommand extends Command
     private function printMongocryptdInfo(SymfonyStyle $io): void
     {
         $io->text('<info>mongocryptd information</info>');
-        $mongocryptdInfo = $this->getMongocryptdInfo();
+        $mongocryptdInfo = $this->encryptionDiagnostic->getMongocryptdInfo();
 
         if ($mongocryptdInfo['mongocryptdPath'] === null) {
             $io->listing(['mongocryptd: not found']);
@@ -228,28 +164,5 @@ final class ConnectionDiagnosticCommand extends Command
             'Key Vault Namespace: ' . $autoEncryptionInfo['keyVaultNamespace'],
             'Key Count: ' . $autoEncryptionInfo['keyCount'],
         ]);
-    }
-
-    private function getExtensionInfoRow(string $row): ?string
-    {
-        $pattern = sprintf('/^%s(.*)$/m', preg_quote($row . ' => '));
-
-        if (preg_match($pattern, $this->getExtensionInfo(), $matches) !== 1) {
-            return null;
-        }
-
-        return $matches[1];
-    }
-
-    private function getExtensionInfo(): string
-    {
-        $extension = new ReflectionExtension('mongodb');
-
-        ob_start();
-        $extension->info();
-        $info = ob_get_contents();
-        ob_end_clean();
-
-        return $info;
     }
 }
