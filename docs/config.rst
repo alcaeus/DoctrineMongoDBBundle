@@ -49,9 +49,9 @@ Sample Configuration
 
     .. code-block:: php
 
+        use Symfony\Config\DoctrineMongodbConfig;
         use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
         use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
-        use Symfony\Config\DoctrineMongodbConfig;
 
         return static function (DoctrineMongodbConfig $config): void {
             $config->connection('default')
@@ -142,9 +142,9 @@ If you wish to use memcached to cache your metadata, you need to configure the
 
     .. code-block:: php
 
-        use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
         use Symfony\Component\Cache\Adapter\MemcachedAdapter;
         use Symfony\Config\DoctrineMongodbConfig;
+        use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 
         return static function (DoctrineMongodbConfig $config): void {
             $config->defaultDatabase('hello_' . param('kernel.environment'));
@@ -260,8 +260,8 @@ The following configuration shows a bunch of mapping examples:
 
     .. code-block:: php
 
-        use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
         use Symfony\Config\DoctrineMongodbConfig;
+        use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 
         return static function (DoctrineMongodbConfig $config): void {
             $config->documentManager('default')
@@ -475,8 +475,8 @@ following syntax:
 
     .. code-block:: php
 
-        use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
         use Symfony\Config\DoctrineMongodbConfig;
+        use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 
         return static function (DoctrineMongodbConfig $config): void {
             $config->defaultDatabase('hello_' . param('kernel.environment'));
@@ -623,15 +623,6 @@ Otherwise you will get a *auth failed* exception.
                     'authSource' => 'db_you_have_access_to',
                 ]);
         };
-
-Specifying a context service
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The MongoDB driver supports receiving a stream context to set SSL and logging options. This can be used to authenticate using SSL certificates.
-
-.. seealso::
-
-    For full documentation and configuration examples for Client-Side Field-Level Encryption (CSFLE) and Queryable Encryption (QE), see :doc:`csfle_qe`
 
 Full Default Configuration
 --------------------------
@@ -916,6 +907,11 @@ Full Default Configuration
                     'wTimeoutMS' => null,
                 ])
         };
+
+.. seealso::
+
+    For full documentation and configuration examples for Client-Side Field-Level
+    Encryption (CSFLE) and Queryable Encryption (QE), see :doc:`csfle_qe`
 
 .. _`Custom types`: https://www.doctrine-project.org/projects/doctrine-mongodb-odm/en/current/reference/custom-mapping-types.html
 .. _`define it as an environment variable`: https://symfony.com/doc/current/configuration.html#configuration-based-on-environment-variables
