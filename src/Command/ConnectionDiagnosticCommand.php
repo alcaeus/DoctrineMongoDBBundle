@@ -65,17 +65,12 @@ final class ConnectionDiagnosticCommand extends Command
             $connectionNames = $this->getConnectionNames();
         }
 
-        $configOk = true;
-
-        $configOk = $configOk && $this->printAndCheckExtensionInfo($io);
+        $configOk = $this->printAndCheckExtensionInfo($io);
         $this->printMongocryptdInfo($io);
 
         foreach ($connectionNames as $name) {
             $diagnostic = $this->diagnostics->get($name);
-            $io->section(sprintf('Connection: %s', $name));
-
-            $configOk = $configOk && $this->printAndCheckServerInfo($io, $diagnostic);
-            $this->printAutoEncryptionConfiguration($io, $diagnostic);
+            $configOk   = $configOk && $this->printAndCheckConnectionDiagnostic($name, $diagnostic, $io);
         }
 
         if ($configOk) {
@@ -91,6 +86,16 @@ final class ConnectionDiagnosticCommand extends Command
     private function getConnectionNames(): array
     {
         return array_keys($this->diagnostics->getProvidedServices());
+    }
+
+    private function printAndCheckConnectionDiagnostic(string $name, ConnectionDiagnostic $diagnostic, SymfonyStyle $io): bool
+    {
+        $io->section(sprintf('Connection: %s', $name));
+
+        $configOk = $this->printAndCheckServerInfo($io, $diagnostic);
+        $this->printAutoEncryptionConfiguration($io, $diagnostic);
+
+        return $configOk;
     }
 
     private function printAndCheckExtensionInfo(SymfonyStyle $io): bool
